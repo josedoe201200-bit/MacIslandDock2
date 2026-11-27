@@ -83,6 +83,48 @@ def main() -> None:
 
     text = replace_once(text, INCLUDE_OLD, INCLUDE_NEW, "include windhawk_utils.h")
 
+    # Ajustes de compatibilidad con Windows SDK / MSVC.
+    text = text.replace(
+        INCLUDE_NEW,
+        INCLUDE_NEW + "\n#ifdef small\n#undef small\n#endif\n"
+        "#ifndef WINBOOL\n#define WINBOOL BOOL\n#endif"
+    )
+
+    # SUBCLASSPROC requiere WINAPI (__stdcall), sin depender de CALLBACK.
+    for proc in ("ThumbnailSubclassProc", "TaskbarSubclassProc", "TaskbandSubclassProc"):
+        text = text.replace(
+            f"LRESULT CALLBACK {proc}(",
+            f"LRESULT __stdcall {proc}("
+        )
+
+    # Evita colisiones con las interfaces ya declaradas por mfidl.h.
+    for name in (
+        "IMFSensorProcessActivity",
+        "IMFSensorActivityReport",
+        "IMFSensorActivitiesReport",
+        "IMFSensorActivitiesReportCallback",
+        "IMFSensorActivityMonitor",
+    ):
+        text = text.replace(name, name + "Compat")
+
+    # shellapi.h redirige ShellExecute a ShellExecuteW, también en el método COM.
+    old_call = (
+        "    const HRESULT hr =\n"
+        "        file ? shell->ShellExecute(file, args, none, none, show)\n"
+        "             : E_OUTOFMEMORY;"
+    )
+    new_call = (
+        '    #pragma push_macro("ShellExecute")\n'
+        "    #undef ShellExecute\n"
+        "    const HRESULT hr =\n"
+        "        file ? shell->ShellExecute(file, args, none, none, show)\n"
+        "             : E_OUTOFMEMORY;\n"
+        '    #pragma pop_macro("ShellExecute")'
+    )
+    if text.count(old_call) != 1:
+        sys.exit("ERROR: no se encontro la llamada COM ShellExecute esperada")
+    text = text.replace(old_call, new_call)
+
     start = text.find(HOOK_START)
     end = text.find(HOOK_END)
     if start < 0 or end < 0 or end < start or text.count(HOOK_START) != 1:
