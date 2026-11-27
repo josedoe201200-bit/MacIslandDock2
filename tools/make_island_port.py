@@ -90,7 +90,7 @@ def main() -> None:
         "#ifndef WINBOOL\n#define WINBOOL BOOL\n#endif"
     )
 
-    text = text.replace(\n        "#undef WINRT_LEAN_AND_MEAN",\n        "#undef WINRT_LEAN_AND_MEAN\\n#ifdef small\\n#undef small\\n#endif"\n    )\n\n    # SUBCLASSPROC requiere WINAPI (__stdcall), sin depender de CALLBACK.
+    # Windows headers define "small" as a macro; clear it after all SDK/WinRT includes.\n    marker = "#undef WINRT_LEAN_AND_MEAN"\n    if marker not in text:\n        sys.exit("ERROR: no se encontro el marcador WINRT_LEAN_AND_MEAN")\n    text = text.replace(marker, marker + "\\n#ifdef small\\n#undef small\\n#endif", 1)\n\n    # SUBCLASSPROC requiere WINAPI (__stdcall), sin depender de CALLBACK.
     for proc in ("ThumbnailSubclassProc", "TaskbarSubclassProc", "TaskbandSubclassProc"):
         text = text.replace(
             f"LRESULT CALLBACK {proc}(",
