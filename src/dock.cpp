@@ -11,7 +11,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include <windowsx.h>
-#include <commoncontrols.h>
+#include <commctrl.h>
 #include <dwmapi.h>
 #include <shellapi.h>
 #include <shlobj.h>
