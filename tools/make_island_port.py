@@ -90,7 +90,7 @@ def main() -> None:
         "#ifndef WINBOOL\n#define WINBOOL BOOL\n#endif"
     )
 
-    # SUBCLASSPROC requiere WINAPI (__stdcall), sin depender de CALLBACK.
+    text = text.replace(\n        "#undef WINRT_LEAN_AND_MEAN",\n        "#undef WINRT_LEAN_AND_MEAN\\n#ifdef small\\n#undef small\\n#endif"\n    )\n\n    # SUBCLASSPROC requiere WINAPI (__stdcall), sin depender de CALLBACK.
     for proc in ("ThumbnailSubclassProc", "TaskbarSubclassProc", "TaskbandSubclassProc"):
         text = text.replace(
             f"LRESULT CALLBACK {proc}(",
