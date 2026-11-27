@@ -238,21 +238,16 @@ std::shared_ptr<Gdiplus::Bitmap> FromHicon(HICON icon) {
 std::shared_ptr<Gdiplus::Bitmap> IconOfFile(const std::wstring& path) {
     const auto cached = g.iconCache.find(path);
     if (cached != g.iconCache.end()) return cached->second;
+
     std::shared_ptr<Gdiplus::Bitmap> result;
     SHFILEINFOW info{};
     if (SHGetFileInfoW(path.c_str(), 0, &info, sizeof(info),
-                       SHGFI_SYSICONINDEX)) {
-        IImageList* list = nullptr;
-        if (SUCCEEDED(SHGetImageList(SHIL_JUMBO, reinterpret_cast<void**>(&list)))) {
-            HICON icon = nullptr;
-            if (SUCCEEDED(list->GetIcon(info.iIcon, ILD_TRANSPARENT, &icon)) &&
-                icon) {
-                result = FromHicon(icon);
-                DestroyIcon(icon);
-            }
-            list->Release();
-        }
+                       SHGFI_ICON | SHGFI_LARGEICON) &&
+        info.hIcon) {
+        result = FromHicon(info.hIcon);
+        DestroyIcon(info.hIcon);
     }
+
     if (result) g.iconCache[path] = result;
     return result;
 }
