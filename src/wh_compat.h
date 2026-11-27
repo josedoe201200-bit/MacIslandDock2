@@ -270,19 +270,24 @@ class StringSetting {
 };
 
 // Solo en el hilo de la ventana (aqui nadie se inyecta en otros procesos).
-inline BOOL SetWindowSubclassFromAnyThread(HWND window, SUBCLASSPROC proc,
+template <typename Proc>
+inline BOOL SetWindowSubclassFromAnyThread(HWND window, Proc proc,
                                            DWORD_PTR refData) {
     if (GetWindowThreadProcessId(window, nullptr) != GetCurrentThreadId()) {
         return FALSE;
     }
-    return SetWindowSubclass(window, proc, (UINT_PTR)proc, refData);
+    // Windows x64 uses one calling convention for C/C++ callbacks.
+    const auto callback = reinterpret_cast<SUBCLASSPROC>(proc);
+    return SetWindowSubclass(window, callback, (UINT_PTR)callback, refData);
 }
 
-inline BOOL RemoveWindowSubclassFromAnyThread(HWND window, SUBCLASSPROC proc) {
+template <typename Proc>
+inline BOOL RemoveWindowSubclassFromAnyThread(HWND window, Proc proc) {
     if (GetWindowThreadProcessId(window, nullptr) != GetCurrentThreadId()) {
         return FALSE;
     }
-    return RemoveWindowSubclass(window, proc, (UINT_PTR)proc);
+    const auto callback = reinterpret_cast<SUBCLASSPROC>(proc);
+    return RemoveWindowSubclass(window, callback, (UINT_PTR)callback);
 }
 
 // Sin inyeccion no hay hooks: la parte de explorer.exe nunca se ejecuta.
