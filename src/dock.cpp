@@ -15,6 +15,7 @@
 #include <dwmapi.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#include <shobjidl.h>
 #include <shlwapi.h>
 
 #include <algorithm>
@@ -242,7 +243,7 @@ std::shared_ptr<Gdiplus::Bitmap> IconOfFile(const std::wstring& path) {
     if (SHGetFileInfoW(path.c_str(), 0, &info, sizeof(info),
                        SHGFI_SYSICONINDEX)) {
         IImageList* list = nullptr;
-        if (SUCCEEDED(SHGetImageList(SHIL_JUMBO, IID_PPV_ARGS(&list)))) {
+        if (SUCCEEDED(SHGetImageList(SHIL_JUMBO, reinterpret_cast<void**>(&list)))) {
             HICON icon = nullptr;
             if (SUCCEEDED(list->GetIcon(info.iIcon, ILD_TRANSPARENT, &icon)) &&
                 icon) {
