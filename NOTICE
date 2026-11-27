@@ -1,0 +1,18 @@
+Mac Island & Dock (app para Windows)
+
+Este proyecto es una obra derivada de "Mac Island & Dock" v3.3.0 (mod de Windhawk)
+Copyright (C) 2026 caliberda (https://github.com/cesarkali)
+https://windhawk.net/mods/mac-island-dock
+
+El mod original se distribuye bajo GNU GPL v3. Esta obra derivada se distribuye
+bajo la misma licencia (GPL-3.0): https://www.gnu.org/licenses/gpl-3.0.html
+
+- third_party/mac-island-dock.cpp : archivo original, sin modificar.
+- tools/make_island_port.py       : conversion mecanica del original a app normal.
+- src/wh_compat.h, src/app_main.cpp, src/dock.*: codigo nuevo.
+
+El codigo del mod que alcanza el arbol XAML de la barra de tareas se basa en
+"Taskbar tray auto-hide (show on hover)" de m417z (misma licencia).
+
+Como pide el autor: si reutilizas este codigo, acredita "Mac Island & Dock by
+caliberda" con un enlace (y a m417z por el codigo XAML de la barra).
